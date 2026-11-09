@@ -1,0 +1,314 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HouseHunting.com - Admin Dashboard</title>
+
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f3f5f9;
+            color: #222;
+        }
+
+        header {
+            background: #172554;
+            color: white;
+            padding: 22px;
+            text-align: center;
+        }
+
+        main {
+            max-width: 950px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+
+        .panel {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px #00000012;
+        }
+
+        input {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin: 12px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            padding: 11px 17px;
+            border: 0;
+            border-radius: 5px;
+            cursor: pointer;
+            color: white;
+            background: #1d4ed8;
+            margin: 5px;
+        }
+
+        button:disabled { opacity: 0.5; }
+
+        .approve { background: #15803d; }
+        .reject { background: #b91c1c; }
+        .logout { background: #475569; }
+
+        .account {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 17px;
+            margin: 15px 0;
+        }
+
+        .message { margin-top: 12px; }
+        .hidden { display: none; }
+
+        .notice {
+            background: #fff7ed;
+            padding: 12px;
+            border-left: 4px solid #ea580c;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+
+<body>
+<header>
+    <h1>HouseHunting.com</h1>
+    <p>Private Administrator Dashboard</p>
+</header>
+
+<main>
+    <section class="panel" id="loginPanel">
+        <h2>Admin Login</h2>
+
+        <form id="loginForm">
+            <input
+                type="email"
+                id="email"
+                placeholder="Admin email"
+                required
+            >
+
+            <input
+                type="password"
+                id="password"
+                placeholder="Admin password"
+                required
+            >
+
+            <button type="submit">Login</button>
+        </form>
+
+        <p class="message" id="loginMessage"></p>
+    </section>
+
+    <section class="panel hidden" id="dashboard">
+        <h2>Pending Account Approvals</h2>
+
+        <p>Welcome, Administrator.</p>
+
+        <div class="notice">
+            Confirm the KSh 5,000 M-Pesa payment independently
+            before approving any landlord or agent.
+        </div>
+
+        <button id="refreshButton">Refresh Accounts</button>
+        <button class="logout" id="logoutButton">Logout</button>
+
+        <p id="dashboardMessage" class="message"></p>
+        <div id="accountsList"></div>
+    </section>
+</main>
+
+<script>
+const API_URL = "http://localhost:3000/api";
+
+const loginPanel = document.getElementById("loginPanel");
+const dashboard = document.getElementById("dashboard");
+const loginMessage = document.getElementById("loginMessage");
+const dashboardMessage = document.getElementById("dashboardMessage");
+const accountsList = document.getElementById("accountsList");
+
+let adminToken = sessionStorage.getItem("adminToken");
+
+function showDashboard() {
+    loginPanel.classList.add("hidden");
+    dashboard.classList.remove("hidden");
+    loadAccounts();
+}
+
+function showLogin() {
+    dashboard.classList.add("hidden");
+    loginPanel.classList.remove("hidden");
+}
+
+async function loadAccounts() {
+    accountsList.textContent = "";
+    dashboardMessage.textContent = "Loading accounts...";
+
+    try {
+        const response = await fetch(
+            `${API_URL}/admin/pending-accounts`,
+            {
+                headers: {
+                    Authorization: `Bearer ${adminToken}`
+                }
+            }
+        );
+
+        const accounts = await response.json();
+
+        if (!response.ok) {
+            throw new Error(accounts.message || "Unable to load accounts.");
+        }
+
+        dashboardMessage.textContent =
+            `${accounts.length} pending account(s) found.`;
+
+        if (accounts.length === 0) {
+            accountsList.textContent = "There are no pending accounts.";
+            return;
+        }
+
+        accounts.forEach(account => {
+            const card = document.createElement("div");
+            card.className = "account";
+
+            const details = document.createElement("p");
+            details.textContent =
+                `Name: ${account.name} | Email: ${account.email} | ` +
+                `Phone: ${account.phone || "Not provided"} | ` +
+                `Role: ${account.role} | Payment: ${account.payment_status}`;
+
+            const approveButton = document.createElement("button");
+            approveButton.className = "approve";
+            approveButton.textContent = "Approve";
+
+            approveButton.addEventListener("click", () => {
+                updateAccount(account.user_id, "approve");
+            });
+
+            const rejectButton = document.createElement("button");
+            rejectButton.className = "reject";
+            rejectButton.textContent = "Reject";
+
+            rejectButton.addEventListener("click", () => {
+                updateAccount(account.user_id, "reject");
+            });
+
+            card.append(details, approveButton, rejectButton);
+            accountsList.appendChild(card);
+        });
+
+    } catch (error) {
+        dashboardMessage.textContent = error.message;
+    }
+}
+
+async function updateAccount(userId, decision) {
+    if (decision === "approve") {
+        const confirmed = confirm(
+            "Have you independently confirmed the KSh 5,000 M-Pesa payment? " +
+            "Only continue if payment is verified."
+        );
+
+        if (!confirmed) return;
+    } else {
+        const confirmed = confirm("Are you sure you want to reject this account?");
+        if (!confirmed) return;
+    }
+
+    try {
+        const response = await fetch(
+            `${API_URL}/admin/accounts/${userId}/approval`,
+            {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${adminToken}`
+                },
+                body: JSON.stringify({
+                    decision,
+                    paymentVerified: decision === "approve"
+                })
+            }
+        );
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.message || "Account update failed.");
+        }
+
+        alert(result.message);
+        loadAccounts();
+
+    } catch (error) {
+        alert(error.message);
+    }
+}
+
+document.getElementById("loginForm").addEventListener("submit", async event => {
+    event.preventDefault();
+
+    loginMessage.textContent = "Logging in...";
+
+    try {
+        const response = await fetch(`${API_URL}/login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                email: document.getElementById("email").value,
+                password: document.getElementById("password").value
+            })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.message || "Login failed.");
+        }
+
+        if (result.user.role !== "admin") {
+            throw new Error("Access denied. This page is for administrators only.");
+        }
+
+        adminToken = result.token;
+        sessionStorage.setItem("adminToken", adminToken);
+
+        showDashboard();
+
+    } catch (error) {
+        loginMessage.textContent = error.message;
+    }
+});
+
+document.getElementById("refreshButton").addEventListener("click", loadAccounts);
+
+document.getElementById("logoutButton").addEventListener("click", () => {
+    sessionStorage.removeItem("adminToken");
+    adminToken = null;
+    accountsList.textContent = "";
+    document.getElementById("password").value = "";
+    loginMessage.textContent = "";
+    showLogin();
+});
+
+if (adminToken) {
+    showDashboard();
+} else {
+    showLogin();
+}
+</script>
+</body>
+</html>

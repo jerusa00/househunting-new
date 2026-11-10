@@ -11,290 +11,320 @@
 </head>
 <body>
 
-    <header>
-        <nav class="navbar">
-            <a href="#" class="logo">House<span>Hunting</span></a>
+<header>
+    <nav class="navbar">
+        <a href="#" class="logo">House<span>Hunting</span></a>
 
-            <div class="nav-links">
-                <a href="#home">Home</a>
-                <a href="#properties">Find Houses</a>
-                <a href="#list-property" id="listPropertyLink" hidden>List Property</a>
-                <a href="#about">About</a>
-            </div>
+        <div class="nav-links">
+            <a href="#home">Home</a>
+            <a href="#properties">Find Houses</a>
+            <a href="#list-property" id="listPropertyLink" hidden>List Property</a>
+            <a href="#about">About</a>
+        </div>
 
-            <div class="nav-buttons" id="authButtons">
-                <button class="btn btn-outline" id="loginLink">Login</button>
-                <button class="btn btn-primary" id="registerLink">Register</button>
-            </div>
+        <div class="nav-buttons" id="authButtons">
+            <button class="btn btn-outline" id="loginLink">Login</button>
+            <button class="btn btn-primary" id="registerLink">Register</button>
+        </div>
 
-            <div class="nav-buttons" id="userButtons" hidden>
-                <span id="welcomeUser"></span>
-                <button class="btn btn-outline" id="logoutLink">Logout</button>
-            </div>
-        </nav>
-    </header>
+        <div class="nav-buttons" id="userButtons" hidden>
+            <span id="welcomeUser"></span>
+            <button class="btn btn-outline" id="logoutLink">Logout</button>
+        </div>
+    </nav>
+</header>
 
-    <main>
-        <section class="hero" id="home">
-            <div class="hero-content">
-                <p class="eyebrow">YOUR NEXT HOME STARTS HERE</p>
-                <h1>Find a Place You'll Love to Call Home</h1>
-                <p>Discover apartments and houses that match your lifestyle and budget.</p>
-                <a href="#properties" class="btn btn-primary">Explore Houses</a>
-            </div>
-        </section>
+<main>
 
-        <section class="section" id="properties">
-            <div class="section-heading">
-                <p class="eyebrow">EXPLORE PROPERTIES</p>
-                <h2>Available Houses</h2>
-                <p>Find your ideal home from our available listings.</p>
-            </div>
+    <section class="hero" id="home">
+        <div class="hero-content">
+            <p class="eyebrow">YOUR NEXT HOME STARTS HERE</p>
+            <h1>Find a Place You'll Love to Call Home</h1>
+            <p>Discover apartments and houses that match your lifestyle and budget.</p>
+            <a href="#properties" class="btn btn-primary">Explore Houses</a>
+        </div>
+    </section>
 
-            <div class="search-bar">
-                <input type="text" id="searchInput" placeholder="Search by house name or location">
+    <section class="section" id="properties">
+        <div class="section-heading">
+            <p class="eyebrow">EXPLORE PROPERTIES</p>
+            <h2>Available Houses</h2>
+            <p>Find your ideal home from our available listings.</p>
+        </div>
 
-                <select id="houseTypeFilter">
-                    <option value="">All house types</option>
-                    <option value="Bedsitter">Bedsitter</option>
-                    <option value="One Bedroom">One Bedroom</option>
-                    <option value="Two Bedroom">Two Bedroom</option>
-                    <option value="Three Bedroom">Three Bedroom</option>
-                </select>
+        <!-- HOUSE SEARCH AND FILTERS -->
+        <div class="search-bar">
 
-                <button class="btn btn-primary" id="searchButton">Search</button>
-            </div>
+            <input
+                type="text"
+                id="searchInput"
+                placeholder="Search by house name or location"
+            >
 
-            <p id="houseMessage" class="message"></p>
+            <select id="houseTypeFilter">
+                <option value="">All house types</option>
+                <option value="Apartment">Apartment</option>
+                <option value="Bedsitter">Bedsitter</option>
+                <option value="One Bedroom">One Bedroom</option>
+                <option value="Two Bedroom">Two Bedroom</option>
+                <option value="Three Bedroom">Three Bedroom</option>
+            </select>
 
-            <div class="property-grid" id="propertyGrid">
-                <p>Loading houses...</p>
-            </div>
-        </section>
+            <select id="bedroomFilter">
+                <option value="">Any number of bedrooms</option>
+                <option value="1">1 bedroom</option>
+                <option value="2">2 bedrooms</option>
+                <option value="3">3 bedrooms</option>
+            </select>
 
-        <section class="section map-section">
-            <div class="section-heading">
-                <p class="eyebrow">EXPLORE LOCATIONS</p>
-                <h2>Find Houses on the Map</h2>
-                <p>Explore available properties by their location.</p>
-            </div>
+            <input
+                type="number"
+                id="maxPriceFilter"
+                placeholder="Maximum rent (KSh)"
+                min="0"
+            >
 
-            <div id="homeMap"></div>
-        </section>
+            <button class="btn btn-primary" id="searchButton">
+                Search
+            </button>
 
-        <section class="section listing-section" id="list-property" hidden>
-            <div class="section-heading">
-                <p class="eyebrow">PROPERTY OWNERS AND AGENTS</p>
-                <h2>List Your Property</h2>
-                <p>Provide the property details below.</p>
-            </div>
+        </div>
 
-            <form id="propertyForm" class="main-form">
-                <label for="propertyName">House or apartment name</label>
-                <input type="text" id="propertyName" name="name" required>
+        <p id="houseMessage" class="message"></p>
 
-                <label for="propertyLocation">Location</label>
-                <input type="text" id="propertyLocation" name="location" required>
+        <div class="property-grid" id="propertyGrid">
+            <p>Loading houses...</p>
+        </div>
+    </section>
 
-                <label for="houseType">House type</label>
-                <select id="houseType" name="house_type" required>
-                    <option value="">Select house type</option>
-                    <option value="Bedsitter">Bedsitter</option>
-                    <option value="One Bedroom">One Bedroom</option>
-                    <option value="Two Bedroom">Two Bedroom</option>
-                    <option value="Three Bedroom">Three Bedroom</option>
-                    <option value="Other">Other</option>
-                </select>
+    <section class="section map-section">
+        <div class="section-heading">
+            <p class="eyebrow">EXPLORE LOCATIONS</p>
+            <h2>Find Houses on the Map</h2>
+            <p>Explore available properties by their location.</p>
+        </div>
 
-                <label for="bedrooms">Number of bedrooms</label>
-                <input type="number" id="bedrooms" name="bedrooms" min="0">
+        <div id="homeMap"></div>
+    </section>
 
-                <label for="price">Monthly rent (KSh)</label>
-                <input type="number" id="price" name="price" min="1" required>
+    <section class="section listing-section" id="list-property" hidden>
+        <div class="section-heading">
+            <p class="eyebrow">PROPERTY OWNERS AND AGENTS</p>
+            <h2>List Your Property</h2>
+            <p>Provide the property details below.</p>
+        </div>
 
-                <label for="amenities">Amenities</label>
-                <textarea id="amenities" name="amenities" placeholder="For example: Water, Security, Parking"></textarea>
+        <form id="propertyForm" class="main-form">
 
-                <label for="availability">Availability</label>
-                <select id="availability" name="availability">
-                    <option value="Available">Available</option>
-                    <option value="Unavailable">Unavailable</option>
-                </select>
+            <label for="propertyName">House or apartment name</label>
+            <input type="text" id="propertyName" name="name" required>
 
-                <label for="exteriorImage">Whole apartment / house picture</label>
-                <input type="file" id="exteriorImage" name="image" accept="image/*" required>
+            <label for="propertyLocation">Location</label>
+            <input type="text" id="propertyLocation" name="location" required>
 
-                <label for="interiorImages">Interior / room pictures (maximum 6)</label>
-                <input type="file" id="interiorImages" name="interiorImages" accept="image/*" multiple>
+            <label for="houseType">House type</label>
+            <select id="houseType" name="house_type" required>
+                <option value="">Select house type</option>
+                <option value="Apartment">Apartment</option>
+                <option value="Bedsitter">Bedsitter</option>
+                <option value="One Bedroom">One Bedroom</option>
+                <option value="Two Bedroom">Two Bedroom</option>
+                <option value="Three Bedroom">Three Bedroom</option>
+                <option value="Other">Other</option>
+            </select>
 
-                <h3>Select the house location on the map</h3>
-                <p>Click the map to place the marker.</p>
+            <label for="bedrooms">Number of bedrooms</label>
+            <input type="number" id="bedrooms" name="bedrooms" min="0">
 
-                <div id="listingMap"></div>
+            <label for="price">Monthly rent (KSh)</label>
+            <input type="number" id="price" name="price" min="1" required>
 
-                <input type="hidden" id="latitude" name="latitude">
-                <input type="hidden" id="longitude" name="longitude">
+            <label for="amenities">Amenities</label>
+            <textarea id="amenities" name="amenities"
+                placeholder="For example: Water, Security, Parking"></textarea>
 
-                <button type="submit" class="btn btn-primary">Add Property</button>
-                <p id="propertyMessage" class="message"></p>
-            </form>
-        </section>
+            <label for="availability">Availability</label>
+            <select id="availability" name="availability">
+                <option value="Available">Available</option>
+                <option value="Unavailable">Unavailable</option>
+            </select>
 
-        <section class="section about-section" id="about">
-            <div class="section-heading">
-                <p class="eyebrow">ABOUT US</p>
-                <h2>Welcome to House Hunting</h2>
-                <p>
-                    Our platform helps tenants discover available homes
-                    and makes it easier for landlords and agents to list
-                    their properties.
-                </p>
-            </div>
-        </section>
-    </main>
+            <label for="exteriorImage">Whole apartment / house picture</label>
+            <input type="file" id="exteriorImage" name="image" accept="image/*" required>
 
-    <footer>
-        <p>&copy; 2026 HouseHunting.com. All rights reserved.</p>
-    </footer>
+            <label for="interiorImages">Interior / room pictures (maximum 6)</label>
+            <input type="file" id="interiorImages" name="interiorImages" accept="image/*" multiple>
 
-    <!-- Login Modal -->
-    <div class="modal" id="loginModal">
-        <div class="modal-content">
-            <button class="close-modal" data-close="loginModal">&times;</button>
-            <h2>Login</h2>
+            <h3>Select the house location on the map</h3>
+            <p>Click the map to place the marker.</p>
 
-            <form id="loginForm" class="main-form">
-                <label for="loginEmail">Email</label>
-                <input type="email" id="loginEmail" required>
+            <div id="listingMap"></div>
 
-                <label for="loginPassword">Password</label>
-                <input type="password" id="loginPassword" required>
+            <input type="hidden" id="latitude" name="latitude">
+            <input type="hidden" id="longitude" name="longitude">
 
-                <button type="submit" class="btn btn-primary">Login</button>
-                <p id="loginMessage" class="message"></p>
-            </form>
+            <button type="submit" class="btn btn-primary">Add Property</button>
+            <p id="propertyMessage" class="message"></p>
 
+        </form>
+    </section>
+
+    <section class="section about-section" id="about">
+        <div class="section-heading">
+            <p class="eyebrow">ABOUT US</p>
+            <h2>Welcome to House Hunting</h2>
             <p>
-                <button type="button" id="forgotPasswordLink" class="btn btn-outline">
-                    Forgot Password?
-                </button>
+                Our platform helps tenants discover available homes
+                and makes it easier for landlords and agents to list
+                their properties.
             </p>
         </div>
-    </div>
+    </section>
 
-    <!-- Registration Modal -->
-    <div class="modal" id="registerModal">
-        <div class="modal-content">
-            <button class="close-modal" data-close="registerModal">&times;</button>
-            <h2>Create an Account</h2>
+</main>
 
-            <form id="registerForm" class="main-form">
-                <label for="registerName">Full name</label>
-                <input type="text" id="registerName" required>
+<footer>
+    <p>&copy; 2026 HouseHunting.com. All rights reserved.</p>
+</footer>
 
-                <label for="registerEmail">Email</label>
-                <input type="email" id="registerEmail" required>
+<!-- LOGIN MODAL -->
+<div class="modal" id="loginModal">
+    <div class="modal-content">
+        <button class="close-modal" data-close="loginModal">&times;</button>
+        <h2>Login</h2>
 
-                <label for="registerPhone">Phone number</label>
-                <input type="tel" id="registerPhone" required>
+        <form id="loginForm" class="main-form">
+            <label for="loginEmail">Email</label>
+            <input type="email" id="loginEmail" required>
 
-                <label for="registerPassword">Password</label>
-                <input type="password" id="registerPassword" minlength="6" required>
+            <label for="loginPassword">Password</label>
+            <input type="password" id="loginPassword" required>
 
-                <label for="accountType">Account type</label>
-                <select id="accountType" required>
-                    <option value="tenant">Tenant</option>
-                    <option value="agent">Agent</option>
-                    <option value="landlord">Landlord / House owner</option>
-                </select>
+            <button type="submit" class="btn btn-primary">Login</button>
+            <p id="loginMessage" class="message"></p>
+        </form>
 
-                <p class="message">
-                    Agents and landlords must complete the KSh 5,000 approval payment.
-                    Their accounts remain pending until payment is verified and approval is granted.
-                </p>
-
-                <button type="submit" class="btn btn-primary">Register</button>
-                <p id="registerMessage" class="message"></p>
-            </form>
-        </div>
-    </div>
-
-    <!-- Email Verification Modal -->
-    <div class="modal" id="verificationModal">
-        <div class="modal-content">
-            <button class="close-modal" data-close="verificationModal">&times;</button>
-            <h2>Verify Your Email</h2>
-
-            <p>Enter the six-digit verification code sent to your email address.</p>
-
-            <form id="verificationForm" class="main-form">
-                <label for="verificationEmail">Email address</label>
-                <input type="email" id="verificationEmail" required>
-
-                <label for="verificationCode">Verification code</label>
-                <input type="text" id="verificationCode" maxlength="6" required>
-
-                <button type="submit" class="btn btn-primary">Verify Email</button>
-                <p id="verificationMessage" class="message"></p>
-            </form>
-
-            <button type="button" id="resendVerificationButton" class="btn btn-outline">
-                Resend Verification Code
+        <p>
+            <button type="button" id="forgotPasswordLink" class="btn btn-outline">
+                Forgot Password?
             </button>
-            <p id="resendVerificationMessage" class="message"></p>
-        </div>
+        </p>
     </div>
+</div>
 
-    <!-- Forgot Password Modal -->
-    <div class="modal" id="forgotPasswordModal">
-        <div class="modal-content">
-            <button class="close-modal" data-close="forgotPasswordModal">&times;</button>
-            <h2>Forgot Password?</h2>
+<!-- REGISTRATION MODAL -->
+<div class="modal" id="registerModal">
+    <div class="modal-content">
+        <button class="close-modal" data-close="registerModal">&times;</button>
+        <h2>Create an Account</h2>
 
-            <p>Enter your email address to receive a password reset code.</p>
+        <form id="registerForm" class="main-form">
+            <label for="registerName">Full name</label>
+            <input type="text" id="registerName" required>
 
-            <form id="forgotPasswordForm" class="main-form">
-                <label for="forgotEmail">Email address</label>
-                <input type="email" id="forgotEmail" required>
+            <label for="registerEmail">Email</label>
+            <input type="email" id="registerEmail" required>
 
-                <button type="submit" class="btn btn-primary">Send Reset Code</button>
-                <p id="forgotPasswordMessage" class="message"></p>
-            </form>
-        </div>
+            <label for="registerPhone">Phone number</label>
+            <input type="tel" id="registerPhone" required>
+
+            <label for="registerPassword">Password</label>
+            <input type="password" id="registerPassword" minlength="6" required>
+
+            <label for="accountType">Account type</label>
+            <select id="accountType" required>
+                <option value="tenant">Tenant</option>
+                <option value="agent">Agent</option>
+                <option value="landlord">Landlord / House owner</option>
+            </select>
+
+            <p class="message">
+                Agents and landlords must complete the KSh 5,000 approval payment.
+                Their accounts remain pending until payment is verified and approval is granted.
+            </p>
+
+            <button type="submit" class="btn btn-primary">Register</button>
+            <p id="registerMessage" class="message"></p>
+        </form>
     </div>
+</div>
 
-    <!-- Reset Password Modal -->
-    <div class="modal" id="resetPasswordModal">
-        <div class="modal-content">
-            <button class="close-modal" data-close="resetPasswordModal">&times;</button>
-            <h2>Reset Your Password</h2>
+<!-- EMAIL VERIFICATION MODAL -->
+<div class="modal" id="verificationModal">
+    <div class="modal-content">
+        <button class="close-modal" data-close="verificationModal">&times;</button>
+        <h2>Verify Your Email</h2>
 
-            <form id="resetPasswordForm" class="main-form">
-                <label for="resetEmail">Email address</label>
-                <input type="email" id="resetEmail" required>
+        <p>Enter the six-digit verification code sent to your email address.</p>
 
-                <label for="resetCode">Password reset code</label>
-                <input type="text" id="resetCode" maxlength="6" required>
+        <form id="verificationForm" class="main-form">
+            <label for="verificationEmail">Email address</label>
+            <input type="email" id="verificationEmail" required>
 
-                <label for="newPassword">New password</label>
-                <input type="password" id="newPassword" minlength="6" required>
+            <label for="verificationCode">Verification code</label>
+            <input type="text" id="verificationCode" maxlength="6" required>
 
-                <button type="submit" class="btn btn-primary">Reset Password</button>
-                <p id="resetPasswordMessage" class="message"></p>
-            </form>
-        </div>
+            <button type="submit" class="btn btn-primary">Verify Email</button>
+            <p id="verificationMessage" class="message"></p>
+        </form>
+
+        <button type="button" id="resendVerificationButton" class="btn btn-outline">
+            Resend Verification Code
+        </button>
+        <p id="resendVerificationMessage" class="message"></p>
     </div>
+</div>
 
-    <!-- Property Details Modal -->
-    <div class="modal" id="detailsModal">
-        <div class="modal-content details-content">
-            <button class="close-modal" data-close="detailsModal">&times;</button>
-            <div id="houseDetails"></div>
-        </div>
+<!-- FORGOT PASSWORD MODAL -->
+<div class="modal" id="forgotPasswordModal">
+    <div class="modal-content">
+        <button class="close-modal" data-close="forgotPasswordModal">&times;</button>
+        <h2>Forgot Password?</h2>
+
+        <p>Enter your email address to receive a password reset code.</p>
+
+        <form id="forgotPasswordForm" class="main-form">
+            <label for="forgotEmail">Email address</label>
+            <input type="email" id="forgotEmail" required>
+
+            <button type="submit" class="btn btn-primary">Send Reset Code</button>
+            <p id="forgotPasswordMessage" class="message"></p>
+        </form>
     </div>
+</div>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="script.js"></script>
+<!-- RESET PASSWORD MODAL -->
+<div class="modal" id="resetPasswordModal">
+    <div class="modal-content">
+        <button class="close-modal" data-close="resetPasswordModal">&times;</button>
+        <h2>Reset Your Password</h2>
+
+        <form id="resetPasswordForm" class="main-form">
+            <label for="resetEmail">Email address</label>
+            <input type="email" id="resetEmail" required>
+
+            <label for="resetCode">Password reset code</label>
+            <input type="text" id="resetCode" maxlength="6" required>
+
+            <label for="newPassword">New password</label>
+            <input type="password" id="newPassword" minlength="6" required>
+
+            <button type="submit" class="btn btn-primary">Reset Password</button>
+            <p id="resetPasswordMessage" class="message"></p>
+        </form>
+    </div>
+</div>
+
+<!-- PROPERTY DETAILS MODAL -->
+<div class="modal" id="detailsModal">
+    <div class="modal-content details-content">
+        <button class="close-modal" data-close="detailsModal">&times;</button>
+        <div id="houseDetails"></div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="script.js"></script>
 
 </body>
 </html>

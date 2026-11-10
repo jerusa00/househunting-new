@@ -10,11 +10,13 @@ let detailsMarker = null;
 let selectedLatitude = null;
 let selectedLongitude = null;
 
-// Keep the email being used for verification and password recovery
 let currentVerificationEmail = "";
 let currentResetEmail = "";
 
-// Get saved login information
+// ===============================
+// LOGIN INFORMATION
+// ===============================
+
 function getToken() {
     return localStorage.getItem("houseHuntingToken");
 }
@@ -27,7 +29,10 @@ function getUser() {
     }
 }
 
-// Escape text before placing it into HTML
+// ===============================
+// HELPER FUNCTIONS
+// ===============================
+
 function escapeHTML(value) {
     return String(value ?? "").replace(/[&<>"']/g, character => ({
         "&": "&amp;",
@@ -38,7 +43,6 @@ function escapeHTML(value) {
     })[character]);
 }
 
-// Show messages
 function showMessage(elementId, message, type = "") {
     const element = document.getElementById(elementId);
 
@@ -48,7 +52,6 @@ function showMessage(elementId, message, type = "") {
     element.className = "message " + type;
 }
 
-// API requests
 async function apiRequest(endpoint, options = {}) {
     const headers = { ...(options.headers || {}) };
 
@@ -74,7 +77,10 @@ async function apiRequest(endpoint, options = {}) {
     return data;
 }
 
-// Modal controls
+// ===============================
+// MODAL CONTROLS
+// ===============================
+
 function openModal(id) {
     const modal = document.getElementById(id);
 
@@ -97,7 +103,10 @@ function closeAllModals() {
     });
 }
 
-// Update navigation depending on login status
+// ===============================
+// NAVIGATION
+// ===============================
+
 function updateNavigation() {
     const user = getUser();
 
@@ -183,10 +192,7 @@ document.getElementById("verificationForm").addEventListener("submit", async eve
 
         const result = await apiRequest("/api/verify-email", {
             method: "POST",
-            body: JSON.stringify({
-                email,
-                code
-            })
+            body: JSON.stringify({ email, code })
         });
 
         showMessage(
@@ -201,6 +207,7 @@ document.getElementById("verificationForm").addEventListener("submit", async eve
             closeModal("verificationModal");
             document.getElementById("loginEmail").value = email;
             openModal("loginModal");
+
             showMessage(
                 "loginMessage",
                 "Email verified. You can now log in.",
@@ -214,6 +221,7 @@ document.getElementById("verificationForm").addEventListener("submit", async eve
 });
 
 // Resend verification code
+
 document.getElementById("resendVerificationButton").addEventListener("click", async () => {
     const email = document.getElementById("verificationEmail").value
         .trim()
@@ -299,7 +307,6 @@ document.getElementById("forgotPasswordLink").addEventListener("click", () => {
     openModal("forgotPasswordModal");
 });
 
-// Request password reset code
 document.getElementById("forgotPasswordForm").addEventListener("submit", async event => {
     event.preventDefault();
 
@@ -335,7 +342,8 @@ document.getElementById("forgotPasswordForm").addEventListener("submit", async e
     }
 });
 
-// Reset password using code
+// Reset password
+
 document.getElementById("resetPasswordForm").addEventListener("submit", async event => {
     event.preventDefault();
 
@@ -369,6 +377,7 @@ document.getElementById("resetPasswordForm").addEventListener("submit", async ev
             closeModal("resetPasswordModal");
             document.getElementById("loginEmail").value = email;
             openModal("loginModal");
+
             showMessage(
                 "loginMessage",
                 "Your password has been reset. Please log in.",
@@ -398,7 +407,10 @@ document.getElementById("logoutLink").addEventListener("click", () => {
     alert("You have logged out successfully.");
 });
 
-// Open login and register forms
+// ===============================
+// LOGIN AND REGISTER BUTTONS
+// ===============================
+
 document.getElementById("loginLink").addEventListener("click", () => {
     openModal("loginModal");
 });
@@ -408,13 +420,15 @@ document.getElementById("registerLink").addEventListener("click", () => {
 });
 
 // Close buttons
+
 document.querySelectorAll(".close-modal").forEach(button => {
     button.addEventListener("click", () => {
         closeModal(button.dataset.close);
     });
 });
 
-// Close modal when clicking outside its content
+// Close modal when clicking outside
+
 document.querySelectorAll(".modal").forEach(modal => {
     modal.addEventListener("click", event => {
         if (event.target === modal) {
@@ -424,7 +438,7 @@ document.querySelectorAll(".modal").forEach(modal => {
 });
 
 // ===============================
-// IMAGE URL HELPER
+// IMAGE URL
 // ===============================
 
 function imageURL(image) {
@@ -458,6 +472,7 @@ async function loadHouses() {
             return;
         }
 
+        // Show all houses initially
         displayHouses(houses);
         initializeHomeMap();
 
@@ -470,7 +485,10 @@ async function loadHouses() {
     }
 }
 
-// Display property cards
+// ===============================
+// DISPLAY HOUSE CARDS
+// ===============================
+
 function displayHouses(propertyList) {
     const grid = document.getElementById("propertyGrid");
 
@@ -481,6 +499,7 @@ function displayHouses(propertyList) {
 
     grid.innerHTML = propertyList.map(house => `
         <article class="property-card">
+
             <img
                 src="${escapeHTML(imageURL(house.image))}"
                 alt="${escapeHTML(house.name)}"
@@ -488,6 +507,7 @@ function displayHouses(propertyList) {
             >
 
             <div class="property-info">
+
                 <h3>${escapeHTML(house.name)}</h3>
 
                 <p class="property-location">
@@ -509,45 +529,98 @@ function displayHouses(propertyList) {
                 >
                     View Details
                 </button>
+
             </div>
         </article>
     `).join("");
 }
 
 // ===============================
-// SEARCH HOUSES
+// HOUSE SEARCH AND FILTERS
 // ===============================
 
 function searchHouses() {
+
+    // Get the search field values
     const search = document.getElementById("searchInput").value
         .trim()
         .toLowerCase();
 
     const type = document.getElementById("houseTypeFilter").value
+        .trim()
         .toLowerCase();
 
+    const bedrooms = document.getElementById("bedroomFilter").value;
+
+    const maxPriceValue = document.getElementById("maxPriceFilter").value;
+
+    const maxPrice = maxPriceValue === ""
+        ? null
+        : Number(maxPriceValue);
+
+    // Filter the houses
     const filtered = houses.filter(house => {
+
+        const houseName = String(house.name || "").toLowerCase();
+        const houseLocation = String(house.location || "").toLowerCase();
+        const houseType = String(house.house_type || "").toLowerCase();
+
+        const houseBedrooms = Number(house.bedrooms);
+        const housePrice = Number(house.price);
+
+        // Search by house name or location
         const matchesSearch =
-            String(house.name).toLowerCase().includes(search) ||
-            String(house.location).toLowerCase().includes(search);
+            !search ||
+            houseName.includes(search) ||
+            houseLocation.includes(search);
 
-        const matchesType = !type ||
-            String(house.house_type || "").toLowerCase() === type;
+        // Search by house type
+        const matchesType =
+            !type || houseType === type;
 
-        return matchesSearch && matchesType;
+        // Search by number of bedrooms
+        const matchesBedrooms =
+            bedrooms === "" || houseBedrooms === Number(bedrooms);
+
+        // Search by maximum monthly rent
+        const matchesPrice =
+            maxPrice === null ||
+            (Number.isFinite(maxPrice) &&
+                Number.isFinite(housePrice) &&
+                housePrice <= maxPrice);
+
+        return (
+            matchesSearch &&
+            matchesType &&
+            matchesBedrooms &&
+            matchesPrice
+        );
     });
 
+    // Display matching houses
     displayHouses(filtered);
 
     showMessage(
         "houseMessage",
-        `${filtered.length} matching house(s) found.`
+        `${filtered.length} matching house(s) found.`,
+        "success"
     );
 }
 
+// Search button
 document.getElementById("searchButton").addEventListener("click", searchHouses);
+
+// Search automatically when typing
 document.getElementById("searchInput").addEventListener("input", searchHouses);
+
+// Filter automatically when house type changes
 document.getElementById("houseTypeFilter").addEventListener("change", searchHouses);
+
+// Filter automatically when bedroom selection changes
+document.getElementById("bedroomFilter").addEventListener("change", searchHouses);
+
+// Filter automatically when maximum price changes
+document.getElementById("maxPriceFilter").addEventListener("input", searchHouses);
 
 // ===============================
 // HOME MAP
@@ -648,6 +721,7 @@ async function showHouseDetails(houseId) {
         } else if (user.role === "tenant") {
             viewingForm = `
                 <form id="viewingForm" class="main-form">
+
                     <h3>Request a Viewing</h3>
 
                     <label for="visitorName">Full name</label>
@@ -673,6 +747,7 @@ async function showHouseDetails(houseId) {
                     </button>
 
                     <p id="viewingMessageStatus" class="message"></p>
+
                 </form>
             `;
         } else {
@@ -682,11 +757,13 @@ async function showHouseDetails(houseId) {
         }
 
         document.getElementById("houseDetails").innerHTML = `
+
             <div class="details-gallery">
                 ${gallery}
             </div>
 
             <div class="details-info">
+
                 <h2>${escapeHTML(house.name)}</h2>
 
                 <p><strong>Location:</strong> ${escapeHTML(house.location)}</p>
@@ -702,7 +779,9 @@ async function showHouseDetails(houseId) {
                 <p><strong>Availability:</strong> ${escapeHTML(house.availability || "Available")}</p>
 
                 <h3>Property Location</h3>
+
                 <div id="detailsMap"></div>
+
             </div>
 
             ${viewingForm}
@@ -727,7 +806,10 @@ async function showHouseDetails(houseId) {
     }
 }
 
-// Details map
+// ===============================
+// DETAILS MAP
+// ===============================
+
 function initializeDetailsMap(house) {
     if (!window.L || house.latitude == null || house.longitude == null) {
         return;
@@ -749,7 +831,8 @@ function initializeDetailsMap(house) {
         attribution: "&copy; OpenStreetMap contributors"
     }).addTo(detailsMap);
 
-    detailsMarker = L.marker([lat, lng]).addTo(detailsMap)
+    detailsMarker = L.marker([lat, lng])
+        .addTo(detailsMap)
         .bindPopup(escapeHTML(house.name))
         .openPopup();
 
@@ -842,6 +925,7 @@ function initializeListingMap() {
 }
 
 // Show listing map when List Property is clicked
+
 document.getElementById("listPropertyLink").addEventListener("click", () => {
     setTimeout(initializeListingMap, 200);
 });
@@ -927,7 +1011,7 @@ document.getElementById("propertyForm").addEventListener("submit", async event =
             });
         }
 
-        loadHouses();
+        await loadHouses();
 
         document.getElementById("properties").scrollIntoView({
             behavior: "smooth"

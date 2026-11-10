@@ -52,40 +52,36 @@
             <p>Find your ideal home from our available listings.</p>
         </div>
 
-        <!-- HOUSE SEARCH AND FILTERS -->
+        <!-- HOUSE FILTERS -->
         <div class="search-bar">
-
-            <input
-                type="text"
-                id="searchInput"
-                placeholder="Search by house name or location"
-            >
 
             <select id="houseTypeFilter">
                 <option value="">All house types</option>
-                <option value="Apartment">Apartment</option>
                 <option value="Bedsitter">Bedsitter</option>
                 <option value="One Bedroom">One Bedroom</option>
                 <option value="Two Bedroom">Two Bedroom</option>
                 <option value="Three Bedroom">Three Bedroom</option>
             </select>
 
-            <select id="bedroomFilter">
-                <option value="">Any number of bedrooms</option>
-                <option value="1">1 bedroom</option>
-                <option value="2">2 bedrooms</option>
-                <option value="3">3 bedrooms</option>
-            </select>
-
             <input
                 type="number"
                 id="maxPriceFilter"
-                placeholder="Maximum rent (KSh)"
+                placeholder="Maximum amount (KSh)"
                 min="0"
             >
 
+            <input
+                type="text"
+                id="locationFilter"
+                placeholder="Enter location e.g. Kisii"
+            >
+
             <button class="btn btn-primary" id="searchButton">
-                Search
+                Search Houses
+            </button>
+
+            <button class="btn btn-outline" id="resetFiltersButton" type="button">
+                Clear Filters
             </button>
 
         </div>
@@ -125,7 +121,6 @@
             <label for="houseType">House type</label>
             <select id="houseType" name="house_type" required>
                 <option value="">Select house type</option>
-                <option value="Apartment">Apartment</option>
                 <option value="Bedsitter">Bedsitter</option>
                 <option value="One Bedroom">One Bedroom</option>
                 <option value="Two Bedroom">Two Bedroom</option>

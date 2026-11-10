@@ -6,7 +6,6 @@ const cors = require("cors");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const multer = require("multer");
-const nodemailer = require("nodemailer");
 const crypto = require("crypto");
 const path = require("path");
 const fs = require("fs");
@@ -26,14 +25,51 @@ if (!fs.existsSync(uploadsFolder)) {
     fs.mkdirSync(uploadsFolder, { recursive: true });
 }
 
-// EMAIL CONFIGURATION
-const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_APP_PASSWORD
+// ==========================================
+// BREVO EMAIL CONFIGURATION
+// ==========================================
+
+async function sendEmail(to, subject, htmlContent) {
+    if (!process.env.BREVO_API_KEY) {
+        throw new Error("BREVO_API_KEY is missing from environment variables.");
     }
-});
+
+    if (!process.env.EMAIL_USER) {
+        throw new Error("EMAIL_USER is missing from environment variables.");
+    }
+
+    const response = await fetch(
+        "https://api.brevo.com/v3/smtp/email",
+        {
+            method: "POST",
+            headers: {
+                "accept": "application/json",
+                "api-key": process.env.BREVO_API_KEY,
+                "content-type": "application/json"
+            },
+            body: JSON.stringify({
+                sender: {
+                    name: "HouseHunting.com",
+                    email: process.env.EMAIL_USER
+                },
+                to: [
+                    {
+                        email: to
+                    }
+                ],
+                subject: subject,
+                htmlContent: htmlContent
+            })
+        }
+    );
+
+    if (!response.ok) {
+        const errorDetails = await response.text();
+        throw new Error(`Brevo email error: ${errorDetails}`);
+    }
+
+    return await response.json();
+}
 
 // Generate six-digit verification codes
 function generateCode() {
@@ -42,11 +78,10 @@ function generateCode() {
 
 // Send verification email
 async function sendVerificationEmail(email, code) {
-    await transporter.sendMail({
-        from: `"HouseHunting.com" <${process.env.EMAIL_USER}>`,
-        to: email,
-        subject: "Verify your HouseHunting.com account",
-        html: `
+    return sendEmail(
+        email,
+        "Verify your HouseHunting.com account",
+        `
             <h2>Welcome to HouseHunting.com!</h2>
             <p>Thank you for registering.</p>
             <p>Your email verification code is:</p>
@@ -54,26 +89,28 @@ async function sendVerificationEmail(email, code) {
             <p>This code expires in 10 minutes.</p>
             <p>If you did not create this account, ignore this email.</p>
         `
-    });
+    );
 }
 
 // Send password reset email
 async function sendPasswordResetEmail(email, code) {
-    await transporter.sendMail({
-        from: `"HouseHunting.com" <${process.env.EMAIL_USER}>`,
-        to: email,
-        subject: "HouseHunting.com Password Reset",
-        html: `
+    return sendEmail(
+        email,
+        "HouseHunting.com Password Reset",
+        `
             <h2>Password Reset</h2>
             <p>Your password reset code is:</p>
             <h1>${code}</h1>
             <p>This code expires in 10 minutes.</p>
             <p>If you did not request a password reset, ignore this email.</p>
         `
-    });
+    );
 }
 
+// ==========================================
 // IMAGE UPLOAD SETTINGS
+// ==========================================
+
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, uploadsFolder);
@@ -99,7 +136,10 @@ const upload = multer({
     }
 });
 
+// ==========================================
 // AUTHENTICATION MIDDLEWARE
+// ==========================================
+
 function authenticateToken(req, res, next) {
     const authHeader = req.headers.authorization;
     const token = authHeader && authHeader.split(" ")[1];
@@ -121,6 +161,7 @@ function authenticateToken(req, res, next) {
         next();
     });
 }
+
 // ADMIN-ONLY SECURITY
 function requireAdmin(req, res, next) {
     if (req.user.role !== "admin") {
@@ -131,7 +172,11 @@ function requireAdmin(req, res, next) {
 
     next();
 }
+
+// ==========================================
 // ADMIN: VIEW PENDING LANDLORDS AND AGENTS
+// ==========================================
+
 app.get(
     "/api/admin/pending-accounts",
     authenticateToken,
@@ -150,6 +195,7 @@ app.get(
             res.json(accounts);
         } catch (error) {
             console.error("Admin pending accounts error:", error);
+
             res.status(500).json({
                 message: "Unable to load pending accounts."
             });
@@ -157,7 +203,10 @@ app.get(
     }
 );
 
+// ==========================================
 // ADMIN: APPROVE OR REJECT AN ACCOUNT
+// ==========================================
+
 app.put(
     "/api/admin/accounts/:id/approval",
     authenticateToken,
@@ -213,6 +262,7 @@ app.put(
 
         } catch (error) {
             console.error("Admin approval error:", error);
+
             res.status(500).json({
                 message: "Unable to update account approval."
             });
@@ -220,12 +270,18 @@ app.put(
     }
 );
 
+// ==========================================
 // HOME ROUTE
+// ==========================================
+
 app.get("/", (req, res) => {
     res.send("House Hunting Backend is Running!");
 });
 
+// ==========================================
 // REGISTER
+// ==========================================
+
 app.post("/api/register", async (req, res) => {
     try {
         const name = req.body.name || req.body.fullName;
@@ -319,7 +375,10 @@ app.post("/api/register", async (req, res) => {
     }
 });
 
+// ==========================================
 // VERIFY EMAIL
+// ==========================================
+
 app.post("/api/verify-email", async (req, res) => {
     try {
         const email = req.body.email?.trim().toLowerCase();
@@ -368,7 +427,10 @@ app.post("/api/verify-email", async (req, res) => {
     }
 });
 
+// ==========================================
 // RESEND VERIFICATION EMAIL
+// ==========================================
+
 app.post("/api/resend-verification", async (req, res) => {
     try {
         const email = req.body.email?.trim().toLowerCase();
@@ -421,7 +483,10 @@ app.post("/api/resend-verification", async (req, res) => {
     }
 });
 
+// ==========================================
 // LOGIN
+// ==========================================
+
 app.post("/api/login", async (req, res) => {
     try {
         const email = req.body.email?.trim().toLowerCase();
@@ -504,7 +569,10 @@ app.post("/api/login", async (req, res) => {
     }
 });
 
+// ==========================================
 // FORGOT PASSWORD
+// ==========================================
+
 app.post("/api/forgot-password", async (req, res) => {
     try {
         const email = req.body.email?.trim().toLowerCase();
@@ -551,7 +619,10 @@ app.post("/api/forgot-password", async (req, res) => {
     }
 });
 
+// ==========================================
 // RESET PASSWORD
+// ==========================================
+
 app.post("/api/reset-password", async (req, res) => {
     try {
         const email = req.body.email?.trim().toLowerCase();
@@ -608,7 +679,10 @@ app.post("/api/reset-password", async (req, res) => {
     }
 });
 
+// ==========================================
 // GET ALL HOUSES
+// ==========================================
+
 app.get("/api/houses", async (req, res) => {
     try {
         const [houses] = await db.query(
@@ -633,7 +707,10 @@ app.get("/api/houses", async (req, res) => {
     }
 });
 
+// ==========================================
 // GET ONE HOUSE
+// ==========================================
+
 app.get("/api/houses/:id", async (req, res) => {
     try {
         const [houses] = await db.query(
@@ -664,7 +741,10 @@ app.get("/api/houses/:id", async (req, res) => {
     }
 });
 
+// ==========================================
 // ADD HOUSE - ONLY AGENTS AND LANDLORDS
+// ==========================================
+
 app.post(
     "/api/houses",
     authenticateToken,
@@ -742,7 +822,10 @@ app.post(
     }
 );
 
+// ==========================================
 // SUBMIT A VIEWING REQUEST
+// ==========================================
+
 app.post("/api/viewing-requests", authenticateToken, async (req, res) => {
     try {
         const {
@@ -806,7 +889,10 @@ app.post("/api/viewing-requests", authenticateToken, async (req, res) => {
     }
 });
 
+// ==========================================
 // VIEWING REQUESTS BELONGING TO LOGGED-IN USER
+// ==========================================
+
 app.get("/api/my-viewing-requests", authenticateToken, async (req, res) => {
     try {
         const [requests] = await db.query(
@@ -829,7 +915,10 @@ app.get("/api/my-viewing-requests", authenticateToken, async (req, res) => {
     }
 });
 
+// ==========================================
 // HANDLE UPLOAD AND OTHER ERRORS
+// ==========================================
+
 app.use((error, req, res, next) => {
     console.error("Server error:", error.message);
 
@@ -844,7 +933,10 @@ app.use((error, req, res, next) => {
     });
 });
 
+// ==========================================
 // START SERVER
+// ==========================================
+
 app.listen(PORT, () => {
     console.log(
         `House Hunting Backend is running on http://localhost:${PORT}`

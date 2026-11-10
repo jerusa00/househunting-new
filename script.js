@@ -1,5 +1,5 @@
 
-const API_URL = "http://localhost:3000";
+const API_URL = "https://househunting-new.onrender.com";
 
 let houses = [];
 let homeMap = null;

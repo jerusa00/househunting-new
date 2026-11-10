@@ -472,7 +472,6 @@ async function loadHouses() {
             return;
         }
 
-        // Show all houses initially
         displayHouses(houses);
         initializeHomeMap();
 
@@ -541,8 +540,7 @@ function displayHouses(propertyList) {
 
 function searchHouses() {
 
-    // Get the search field values
-    const search = document.getElementById("searchInput").value
+    const location = document.getElementById("locationFilter").value
         .trim()
         .toLowerCase();
 
@@ -550,54 +548,35 @@ function searchHouses() {
         .trim()
         .toLowerCase();
 
-    const bedrooms = document.getElementById("bedroomFilter").value;
-
     const maxPriceValue = document.getElementById("maxPriceFilter").value;
 
     const maxPrice = maxPriceValue === ""
         ? null
         : Number(maxPriceValue);
 
-    // Filter the houses
     const filtered = houses.filter(house => {
 
-        const houseName = String(house.name || "").toLowerCase();
         const houseLocation = String(house.location || "").toLowerCase();
         const houseType = String(house.house_type || "").toLowerCase();
-
-        const houseBedrooms = Number(house.bedrooms);
         const housePrice = Number(house.price);
 
-        // Search by house name or location
-        const matchesSearch =
-            !search ||
-            houseName.includes(search) ||
-            houseLocation.includes(search);
+        const matchesLocation =
+            !location || houseLocation.includes(location);
 
-        // Search by house type
         const matchesType =
             !type || houseType === type;
 
-        // Search by number of bedrooms
-        const matchesBedrooms =
-            bedrooms === "" || houseBedrooms === Number(bedrooms);
-
-        // Search by maximum monthly rent
         const matchesPrice =
             maxPrice === null ||
-            (Number.isFinite(maxPrice) &&
+            (
+                Number.isFinite(maxPrice) &&
                 Number.isFinite(housePrice) &&
-                housePrice <= maxPrice);
+                housePrice <= maxPrice
+            );
 
-        return (
-            matchesSearch &&
-            matchesType &&
-            matchesBedrooms &&
-            matchesPrice
-        );
+        return matchesLocation && matchesType && matchesPrice;
     });
 
-    // Display matching houses
     displayHouses(filtered);
 
     showMessage(
@@ -608,19 +587,33 @@ function searchHouses() {
 }
 
 // Search button
+
 document.getElementById("searchButton").addEventListener("click", searchHouses);
 
-// Search automatically when typing
-document.getElementById("searchInput").addEventListener("input", searchHouses);
+// Filter automatically when location changes
+
+document.getElementById("locationFilter").addEventListener("input", searchHouses);
 
 // Filter automatically when house type changes
+
 document.getElementById("houseTypeFilter").addEventListener("change", searchHouses);
 
-// Filter automatically when bedroom selection changes
-document.getElementById("bedroomFilter").addEventListener("change", searchHouses);
-
 // Filter automatically when maximum price changes
+
 document.getElementById("maxPriceFilter").addEventListener("input", searchHouses);
+
+// Clear all filters
+
+document.getElementById("resetFiltersButton").addEventListener("click", () => {
+
+    document.getElementById("locationFilter").value = "";
+    document.getElementById("houseTypeFilter").value = "";
+    document.getElementById("maxPriceFilter").value = "";
+
+    displayHouses(houses);
+
+    showMessage("houseMessage", "All available houses are displayed.", "success");
+});
 
 // ===============================
 // HOME MAP

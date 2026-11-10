@@ -6,7 +6,6 @@ let homeMap = null;
 let listingMap = null;
 let detailsMap = null;
 let listingMarker = null;
-let detailsMarker = null;
 let selectedLatitude = null;
 let selectedLongitude = null;
 
@@ -84,17 +83,13 @@ async function apiRequest(endpoint, options = {}) {
 function openModal(id) {
     const modal = document.getElementById(id);
 
-    if (modal) {
-        modal.classList.add("show");
-    }
+    if (modal) modal.classList.add("show");
 }
 
 function closeModal(id) {
     const modal = document.getElementById(id);
 
-    if (modal) {
-        modal.classList.remove("show");
-    }
+    if (modal) modal.classList.remove("show");
 }
 
 function closeAllModals() {
@@ -352,7 +347,6 @@ document.getElementById("resetPasswordForm").addEventListener("submit", async ev
         .toLowerCase();
 
     const code = document.getElementById("resetCode").value.trim();
-
     const newPassword = document.getElementById("newPassword").value;
 
     try {
@@ -360,11 +354,7 @@ document.getElementById("resetPasswordForm").addEventListener("submit", async ev
 
         const result = await apiRequest("/api/reset-password", {
             method: "POST",
-            body: JSON.stringify({
-                email,
-                code,
-                newPassword
-            })
+            body: JSON.stringify({ email, code, newPassword })
         });
 
         showMessage(
@@ -419,15 +409,11 @@ document.getElementById("registerLink").addEventListener("click", () => {
     openModal("registerModal");
 });
 
-// Close buttons
-
 document.querySelectorAll(".close-modal").forEach(button => {
     button.addEventListener("click", () => {
         closeModal(button.dataset.close);
     });
 });
-
-// Close modal when clicking outside
 
 document.querySelectorAll(".modal").forEach(modal => {
     modal.addEventListener("click", event => {
@@ -496,42 +482,51 @@ function displayHouses(propertyList) {
         return;
     }
 
-    grid.innerHTML = propertyList.map(house => `
-        <article class="property-card">
+    grid.innerHTML = propertyList.map(house => {
+        const bedroomCount = Number(house.bedrooms);
 
-            <img
-                src="${escapeHTML(imageURL(house.image))}"
-                alt="${escapeHTML(house.name)}"
-                onerror="this.src='https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=900&q=80'"
-            >
+        const bedroomLabel = bedroomCount === 0
+            ? "Bedsitter"
+            : bedroomCount === 1
+                ? "1 Bedroom"
+                : `${bedroomCount} Bedrooms`;
 
-            <div class="property-info">
+        return `
+            <article class="property-card">
 
-                <h3>${escapeHTML(house.name)}</h3>
-
-                <p class="property-location">
-                    ${escapeHTML(house.location)}
-                </p>
-
-                <div class="property-meta">
-                    <span>${escapeHTML(house.house_type || "House")}</span>
-                    <span>${escapeHTML(house.bedrooms ?? "N/A")} bedrooms</span>
-                </div>
-
-                <p class="property-price">
-                    KSh ${Number(house.price).toLocaleString("en-KE")} / month
-                </p>
-
-                <button
-                    class="btn btn-primary"
-                    onclick="showHouseDetails(${Number(house.house_id)})"
+                <img
+                    src="${escapeHTML(imageURL(house.image))}"
+                    alt="${escapeHTML(house.name)}"
+                    onerror="this.src='https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=900&q=80'"
                 >
-                    View Details
-                </button>
 
-            </div>
-        </article>
-    `).join("");
+                <div class="property-info">
+
+                    <h3>${escapeHTML(house.name)}</h3>
+
+                    <p class="property-location">
+                        ${escapeHTML(house.location)}
+                    </p>
+
+                    <div class="property-meta">
+                        <span>${escapeHTML(bedroomLabel)}</span>
+                    </div>
+
+                    <p class="property-price">
+                        KSh ${Number(house.price).toLocaleString("en-KE")} / month
+                    </p>
+
+                    <button
+                        class="btn btn-primary"
+                        onclick="showHouseDetails(${Number(house.house_id)})"
+                    >
+                        View Details
+                    </button>
+
+                </div>
+            </article>
+        `;
+    }).join("");
 }
 
 // ===============================
@@ -539,14 +534,11 @@ function displayHouses(propertyList) {
 // ===============================
 
 function searchHouses() {
-
     const location = document.getElementById("locationFilter").value
         .trim()
         .toLowerCase();
 
-    const type = document.getElementById("houseTypeFilter").value
-        .trim()
-        .toLowerCase();
+    const bedroomsValue = document.getElementById("bedroomFilter").value;
 
     const maxPriceValue = document.getElementById("maxPriceFilter").value;
 
@@ -555,16 +547,16 @@ function searchHouses() {
         : Number(maxPriceValue);
 
     const filtered = houses.filter(house => {
-
         const houseLocation = String(house.location || "").toLowerCase();
-        const houseType = String(house.house_type || "").toLowerCase();
+        const houseBedrooms = Number(house.bedrooms);
         const housePrice = Number(house.price);
 
         const matchesLocation =
             !location || houseLocation.includes(location);
 
-        const matchesType =
-            !type || houseType === type;
+        const matchesBedrooms =
+            bedroomsValue === "" ||
+            houseBedrooms === Number(bedroomsValue);
 
         const matchesPrice =
             maxPrice === null ||
@@ -574,7 +566,7 @@ function searchHouses() {
                 housePrice <= maxPrice
             );
 
-        return matchesLocation && matchesType && matchesPrice;
+        return matchesLocation && matchesBedrooms && matchesPrice;
     });
 
     displayHouses(filtered);
@@ -586,28 +578,17 @@ function searchHouses() {
     );
 }
 
-// Search button
-
 document.getElementById("searchButton").addEventListener("click", searchHouses);
-
-// Filter automatically when location changes
 
 document.getElementById("locationFilter").addEventListener("input", searchHouses);
 
-// Filter automatically when house type changes
-
-document.getElementById("houseTypeFilter").addEventListener("change", searchHouses);
-
-// Filter automatically when maximum price changes
+document.getElementById("bedroomFilter").addEventListener("change", searchHouses);
 
 document.getElementById("maxPriceFilter").addEventListener("input", searchHouses);
 
-// Clear all filters
-
 document.getElementById("resetFiltersButton").addEventListener("click", () => {
-
     document.getElementById("locationFilter").value = "";
-    document.getElementById("houseTypeFilter").value = "";
+    document.getElementById("bedroomFilter").value = "";
     document.getElementById("maxPriceFilter").value = "";
 
     displayHouses(houses);
@@ -749,6 +730,14 @@ async function showHouseDetails(houseId) {
             `;
         }
 
+        const bedroomCount = Number(house.bedrooms);
+
+        const bedroomLabel = bedroomCount === 0
+            ? "Bedsitter"
+            : bedroomCount === 1
+                ? "1 Bedroom"
+                : `${bedroomCount} Bedrooms`;
+
         document.getElementById("houseDetails").innerHTML = `
 
             <div class="details-gallery">
@@ -761,9 +750,7 @@ async function showHouseDetails(houseId) {
 
                 <p><strong>Location:</strong> ${escapeHTML(house.location)}</p>
 
-                <p><strong>House type:</strong> ${escapeHTML(house.house_type || "Not specified")}</p>
-
-                <p><strong>Bedrooms:</strong> ${escapeHTML(house.bedrooms ?? "Not specified")}</p>
+                <p><strong>Bedrooms:</strong> ${escapeHTML(bedroomLabel)}</p>
 
                 <p><strong>Monthly rent:</strong> KSh ${Number(house.price).toLocaleString("en-KE")}</p>
 
@@ -824,7 +811,7 @@ function initializeDetailsMap(house) {
         attribution: "&copy; OpenStreetMap contributors"
     }).addTo(detailsMap);
 
-    detailsMarker = L.marker([lat, lng])
+    L.marker([lat, lng])
         .addTo(detailsMap)
         .bindPopup(escapeHTML(house.name))
         .openPopup();
@@ -859,7 +846,7 @@ async function submitViewingRequest(event, houseId) {
 
         showMessage(
             "viewingMessageStatus",
-            result.message,
+            result.message || "Your viewing request was sent successfully.",
             "success"
         );
 
@@ -917,8 +904,6 @@ function initializeListingMap() {
     setTimeout(() => listingMap.invalidateSize(), 150);
 }
 
-// Show listing map when List Property is clicked
-
 document.getElementById("listPropertyLink").addEventListener("click", () => {
     setTimeout(initializeListingMap, 200);
 });
@@ -967,7 +952,6 @@ document.getElementById("propertyForm").addEventListener("submit", async event =
 
     formData.append("name", document.getElementById("propertyName").value.trim());
     formData.append("location", document.getElementById("propertyLocation").value.trim());
-    formData.append("house_type", document.getElementById("houseType").value);
     formData.append("bedrooms", document.getElementById("bedrooms").value);
     formData.append("price", document.getElementById("price").value);
     formData.append("amenities", document.getElementById("amenities").value);
@@ -988,7 +972,11 @@ document.getElementById("propertyForm").addEventListener("submit", async event =
             body: formData
         });
 
-        showMessage("propertyMessage", result.message, "success");
+        showMessage(
+            "propertyMessage",
+            result.message || "Property added successfully.",
+            "success"
+        );
 
         document.getElementById("propertyForm").reset();
 

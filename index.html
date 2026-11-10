@@ -52,15 +52,14 @@
             <p>Find your ideal home from our available listings.</p>
         </div>
 
-        <!-- HOUSE FILTERS -->
         <div class="search-bar">
 
-            <select id="houseTypeFilter">
-                <option value="">All house types</option>
-                <option value="Bedsitter">Bedsitter</option>
-                <option value="One Bedroom">One Bedroom</option>
-                <option value="Two Bedroom">Two Bedroom</option>
-                <option value="Three Bedroom">Three Bedroom</option>
+            <select id="bedroomFilter">
+                <option value="">All bedrooms</option>
+                <option value="0">Bedsitter</option>
+                <option value="1">1 Bedroom</option>
+                <option value="2">2 Bedrooms</option>
+                <option value="3">3 Bedrooms</option>
             </select>
 
             <input
@@ -118,18 +117,14 @@
             <label for="propertyLocation">Location</label>
             <input type="text" id="propertyLocation" name="location" required>
 
-            <label for="houseType">House type</label>
-            <select id="houseType" name="house_type" required>
-                <option value="">Select house type</option>
-                <option value="Bedsitter">Bedsitter</option>
-                <option value="One Bedroom">One Bedroom</option>
-                <option value="Two Bedroom">Two Bedroom</option>
-                <option value="Three Bedroom">Three Bedroom</option>
-                <option value="Other">Other</option>
-            </select>
-
             <label for="bedrooms">Number of bedrooms</label>
-            <input type="number" id="bedrooms" name="bedrooms" min="0">
+            <select id="bedrooms" name="bedrooms" required>
+                <option value="">Select number of bedrooms</option>
+                <option value="0">Bedsitter</option>
+                <option value="1">1 Bedroom</option>
+                <option value="2">2 Bedrooms</option>
+                <option value="3">3 Bedrooms</option>
+            </select>
 
             <label for="price">Monthly rent (KSh)</label>
             <input type="number" id="price" name="price" min="1" required>
